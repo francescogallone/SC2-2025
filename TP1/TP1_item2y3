@@ -1,3 +1,17 @@
+% TRABAJO PRÁCTICO N° 1 
+% Profesor: Julian A. Pucheta 
+% Alumno: Gallone Francesco Claudio
+% Caso de estudio 1
+
+clear all; clc; close all; 
+
+% Caso de estudio 1: Sistema de dos variables 
+% Ítem [2] y 3 En el archivo curvas_medidas_rlc datos en la hoja 1 y 
+%etiquetas en la hoja 2 ) estan las series de datos que sirven para 
+%deducir los valores de rlc del circuito. Emplear el metodo de la respuesta 
+%al escalon tomando como salida la tension en el capacitor.
+%Una vez determinados los parametros RLC emplear la serie de corriente desde 
+%0.05 seg en adelante para validar el resultado superponiendo las graficas 
 close all; clc; clear all;
 %lectura de datos
 values = xlsread("Curvas_Medidas_RLC_2025.xls");
