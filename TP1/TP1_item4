@@ -1,1 +1,81 @@
+%TRABAJO PRACTICO N° 1
+% Profesor: Julian Pucheta
+% Alumno: Gallone Claudio Francesco
+% Caso de estudio 2
+% Ejericio 4
+% Sistema de 3 variables de estado
+ clear all ; clc; close all;
+
+% Dadas las ecuaciones del motor de corriente continua con un torque de
+% carga TL no nulo, con los parámetros: 
+
+Laa = 366e-6; % Inductancia
+J = 5e-9; % Momento de inercia del rotor: Representa cuanta energía se necesita para 
+% acelerar o desacelerar el eje. 
+Ra = 55.6; % Resistencia 
+Bm = 0; % Coeficiente de fricción 
+Ki = 6.49e-3; % Constante de torque 
+Km = 6.53e-3; % Constante de fuerza contra-electromotriz 
+Va   = 12;                     % tensión de actuación sobre el motor
+
+A = [-Ra/Laa -Km/Laa 0; Ki/J -Bm/J 0; 0 1 0]
+
+B = [1/Laa 0 ; 0 -1/J ; 0 0]
+
+C = [0 1 0]
+
+D = [0 0]
+%calculo 
+autovalores_A = eig(A)
+p1 = autovalores_A(1); % = 0
+p2 = autovalores_A(2); % = -0.001525982510575 e5
+p3 = autovalores_A(3); % = -1.5176 e5
+
+h = log(0.95)/(-151760)
+%h = 3.3799e-07
+
+Tsim = 5 %tiempo de simulacion
+h = 1e-5 %tamaño de paso
+NP = round(Tsim/h); %numero de puntos
+t = linspace(0,Tsim,NP);
+
+%torque maximo
+Ia = Va/Ra;
+TL = Ia*Ki;
+
+%entradas de voltaje y torque
+va = 12* ones(1,NP);
+Tl = TL * ones(1,NP);
+u = [va;Tl];
+
+%inicializo estados
+
+x = [0;0;0];
+ia = zeros(1,NP);
+w = zeros(1,NP);
+tetha = zeros (1,NP);
+
+%Ssimulacion por euler
+for i = 1:NP-1
+    xp = A * x + B * u(:,i); %dx/dt
+    x = x + xp*h;
+    ia(i+1) = x(1);
+    w(i+1) = x(2);
+    tetha(i+1) = x(3);
+end
+
+%GRAFICAR 
+figure
+subplot(3,1,1);plot(t, ia, "r");grid on;
+title("Corriente en el motor"); ylabel("ia (A)");
+subplot(3,1,2);plot(t, ia, "b");grid on;
+title("Velocidad angular");ylabel("w (rad/seg)");
+subplot(3,1,3);plot(t, ia, "y");grid on;
+title("Posicion angular");xlabel("Tiempo (s)"); ylabel("tetha  (rad)")
+
+%practicamente la velocidad angular es 0 por lo que a grandes rasgos esta
+%quieto, por lo que puedo dar por satisfactorio que se cumple el torque
+%maximo, un valor aproximado de Tl = 1,4e-3 Nm
+
+
 
