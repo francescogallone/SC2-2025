@@ -1,0 +1,217 @@
+%TRABAJO PRACTICO N° 1
+% Profesor: Julian Pucheta
+% Alumno: Gallone Claudio Francesco
+% Caso de estudio 2
+% Ejercicio 5
+% Sistema de 3 variables de estado
+
+clear all; clc; close all;
+
+values = xlsread("Curvas_Medidas_Motor_2025_v.xls");
+t = values(1:end,1);
+w = values(1:end,2);
+i_a = values(1:end,3);
+va = values(1:end,4);
+T_l = values(1:end,5);
+Vin = 2;
+
+%gráfico de la velocidad angular
+figure(1)
+subplot(4,1,1)
+plot(t,w,"m");
+title ("Velocidad angular según Tabla (rad/s"); grid on; hold on;
+
+subplot(4,1,2)
+plot(t,i_a,"r");
+title ("Corriente de armadura según Tabla (A)"); grid on; hold on;
+
+subplot(4,1,3)
+plot(t,va,"b");
+title ("Tensión de entrada según Tabla (V)"); grid on; hold on;
+
+subplot(4,1,4)
+plot(t,T_l,"g");
+title ("Torque según Tabla (Nm)"); grid on; hold on;
+
+%METODO DE CHEN
+% ELIJO 3 PUNTOS EQUISDISTANTES SEGUN LA GRAFICA DE LA VELOCIDAD ANGULAR
+%CUMPLIENDO CONDICIONES NULAS y MAXIMA VARIACION
+
+t1_w = values(110,1); y1_w = values(110,2);
+t2_w = values(120,1); y2_w = values(120,2);
+t3_w = values(130,1); y3_w = values(130,2);
+
+%elijo un 4to punto para normalizar al escalon (ganancia)
+t4_w = values(1500,1); y4_w = values(1500,2);
+
+%normalizo valores
+k_w = y4_w/Vin;
+y1_w = y1_w/Vin;
+y2_w = y2_w/Vin;
+y3_w = y3_w/Vin;
+
+k1 = (y1_w/k_w)-1;
+k2 = (y2_w/k_w)-1;
+k3 = (y3_w/k_w)-1;
+
+b=((4)*(k1^3)*(k3))-((3)*(k1^2)*(k2^2))-((4)*(k2^3))+(k3^2)+((6)*(k1)*(k2)*(k3));
+
+% 6: Cálculo de alfas 
+alfa1 = ((k1*k2)+(k3)-(sqrt(b)))/(2*((k1^2)+(k2))); 
+alfa2 = ((k1*k2)+(k3)+(sqrt(b)))/(2*((k1^2)+(k2))); 
+
+% 7: Cálculo de beta 
+Beta=(k1+alfa2)/(alfa1-alfa2); 
+
+%Calculo la constante de tiempo T1:
+T1= -((t1_w)/(log(alfa1)))
+
+%Calculo la constante de tiempo T2:
+T2= -(t1_w)/(log(alfa2))
+
+%Calculo la constante de tiempo T3:
+T3= (Beta*(T1-T2))+(T1)
+
+% Función de transferencia calculada por el método de CHEN 
+G_w = tf(k_w*[T3 1],conv([T1 1],[T2 1])) %   G_w = (w)/(Va)
+
+%metodo de chen para la corriente 
+
+t1_i = values(110,1); y1_i = values(110,3);
+t2_i = values(120,1); y2_i = values(120,3);
+t3_i = values(130,1); y3_i = values(130,3);
+
+t4_i = values(1500,1); y4_i = values(1500,3);
+
+%normalizo valores
+k_i = y4_i/Vin;
+y1_i = y1_i/Vin;
+y2_i = y2_i/Vin;
+y3_i = y3_i/Vin;
+
+k1_i = (y1_i/k_i)-1;
+k2_i = (y2_i/k_i)-1;
+k3_i = (y3_i/k_i)-1;
+
+b_i=((4)*(k1_i^3)*(k3_i))-((3)*(k1_i^2)*(k2_i^2))-((4)*(k2_i^3))+(k3_i^2)+((6)*(k1_i)*(k2_i)*(k3_i));
+
+% 6: Cálculo de alfas 
+alfa1_i = ((k1_i*k2_i)+(k3_i)-(sqrt(b_i)))/(2*((k1_i^2)+(k2_i))); 
+alfa2_i = ((k1_i*k2_i)+(k3_i)+(sqrt(b_i)))/(2*((k1_i^2)+(k2_i))); 
+
+% 7: Cálculo de beta 
+Beta_i=(k1_i+alfa2_i)/(alfa1_i-alfa2_i);
+
+%Calculo la constante de tiempo T1:
+T1_i= -((t1_i)/(log(alfa1_i)))
+
+%Calculo la constante de tiempo T2:
+T2_i= -(t1_i)/(log(alfa2_i))
+
+%Calculo la constante de tiempo T3:
+T3_i= (Beta_i*(T1_i-T2_i))+(T1_i)
+
+G_i = tf(k_i*[T3_i 1],conv([T1_i 1],[T2_i 1])) 
+Ki = 0.2769;
+J  = 0.0028;
+B = 0;                         % se lo puede aproximar a 0
+Laa = 0.0055;
+Ra = 2.4136;
+Km = 0.2625;
+
+
+% Armo las matrices del espacio de estados según las ecuaciones de estado
+% y la ecuación de salida:
+
+% Definir las matrices del espacio de estados
+A = [-Ra/Laa, -Km/Laa, 0; 
+     Ki/J, -B/J, 0; 
+     0, 1, 0]; % A definir según tus parámetros
+
+B = [1/Laa, 0; 
+     0, -1/J; 
+     0, 0];  % A definir según tus parámetros
+
+C = [0, 1, 0]; % Salida correspondiente a la velocidad angular (w)
+D = [0, 0];    % Sin componente directa
+
+% Parámetros de simulación y muestreo
+t_sim = 1.5; % Tiempo de simulación en segundos
+t_muestreo = 1e-5; % Tiempo de muestreo
+num_puntos = round(t_sim / t_muestreo) + 1;
+
+% Inicializamos los vectores para la simulación
+t2 = linspace(0, t_sim, num_puntos);
+u = zeros(1, num_puntos);    % Entrada de voltaje (Vin)
+TL = zeros(1, num_puntos);   % Torque de carga (T_l)
+Ia = zeros(1, num_puntos);   % Corriente de armadura (i_a)
+Wr = zeros(1, num_puntos);   % Velocidad angular (w)
+Tita = zeros(1, num_puntos); % Variable adicional si se necesita
+
+% Definir el vector de estados iniciales
+x = [0 0 0]';  % Condiciones iniciales ( [i_a, w, theta] )
+
+x0 = [0 0 0]'; % Punto de operación (en este caso, inicialmente cero)
+
+% Le damos valores a la salida y las variables de estado en cada punto
+for i = 1:(t_sim / t_muestreo) - 1
+    % Definición de la entrada de voltaje y torque de carga
+    if(t2(i) > 0.1)
+        u(i) = 2;  % Voltaje de entrada (Vin)
+    end
+
+    if(t2(i) > 0.7)
+        TL(i) = 0.12;  % Torque de carga
+    end
+
+    if(t2(i) > 1)
+        TL(i) = 0;   % Cambio en el torque de carga después de 1 segundo
+    end
+
+    % Ecuaciones de estado y de salida
+    % Aquí se actualiza el vector de estados usando la ecuación de espacio de estados
+    x_punto = A * (x - x0) + B * [u(i); TL(i)];  % Derivadas de las variables de estado
+    x = x + x_punto * t_muestreo;  % Integración de Euler
+
+    % Salida del sistema (velocidad angular en este caso)
+    y = C * x;
+
+    % Guardamos las salidas y las variables de estado
+    Wr(i + 1) = y;          % Velocidad angular
+    Ia(i + 1) = x(1);       % Corriente de armadura (i_a)
+    Tita(i + 1) = x(3);     % Variable adicional (si la necesitas)
+end
+
+% Finalmente, graficamos las entradas, salidas y variables de estado
+figure(1);
+subplot(4,1,1);
+plot(t2, Wr, '--');
+legend('CHEN - - - - -');
+title('Velocidad Angular');
+xlabel('Tiempo (s)');
+ylabel('Velocidad angular (rad/s)');
+grid on;
+
+subplot(4,1,2);
+plot(t2, Ia, '--');
+legend('CHEN - - - - -');
+title('Corriente en la Armadura');
+xlabel('Tiempo (s)');
+ylabel('Corriente (A)');
+grid on;
+
+subplot(4,1,3);
+plot(t2, u, '--');
+legend('CHEN - - - - -');
+title('Tensión de Entrada');
+xlabel('Tiempo (s)');
+ylabel('Voltaje (V)');
+grid on;
+
+subplot(4,1,4);
+plot(t2, TL, '--');
+legend('CHEN - - - - -');
+title('Torque de Carga');
+ylabel('Torque (N.m)');
+xlabel('Tiempo (s)');
+grid on;
