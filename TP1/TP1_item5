@@ -216,4 +216,3 @@ title('Torque de Carga');
 ylabel('Torque (N.m)');
 xlabel('Tiempo (s)');
 grid on;
-|||
