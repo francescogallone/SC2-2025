@@ -112,6 +112,7 @@ T2_i= -(t1_i)/(log(alfa2_i))
 T3_i= (Beta_i*(T1_i-T2_i))+(T1_i)
 
 G_i = tf(k_i*[T3_i 1],conv([T1_i 1],[T2_i 1])) 
+
 Ki = 0.2769;
 J  = 0.0028;
 B = 0;                         % se lo puede aproximar a 0
@@ -185,7 +186,7 @@ end
 % Finalmente, graficamos las entradas, salidas y variables de estado
 figure(1);
 subplot(4,1,1);
-plot(t2, Wr, '--');
+plot(t2, Wr, '--g', 'LineWidth', 2);
 legend('CHEN - - - - -');
 title('Velocidad Angular');
 xlabel('Tiempo (s)');
@@ -193,7 +194,7 @@ ylabel('Velocidad angular (rad/s)');
 grid on;
 
 subplot(4,1,2);
-plot(t2, Ia, '--');
+plot(t2, Ia, '--g', 'LineWidth', 2);
 legend('CHEN - - - - -');
 title('Corriente en la Armadura');
 xlabel('Tiempo (s)');
@@ -201,7 +202,7 @@ ylabel('Corriente (A)');
 grid on;
 
 subplot(4,1,3);
-plot(t2, u, '--');
+plot(t2, u, '--r', 'LineWidth', 2);
 legend('CHEN - - - - -');
 title('Tensión de Entrada');
 xlabel('Tiempo (s)');
@@ -209,9 +210,10 @@ ylabel('Voltaje (V)');
 grid on;
 
 subplot(4,1,4);
-plot(t2, TL, '--');
+plot(t2, TL, '--r', 'LineWidth', 2);
 legend('CHEN - - - - -');
 title('Torque de Carga');
 ylabel('Torque (N.m)');
 xlabel('Tiempo (s)');
 grid on;
+|||
