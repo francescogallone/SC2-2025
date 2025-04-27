@@ -1,10 +1,11 @@
-%TRABAJO PRACTICO N° 1
-% Profesor: Julian Pucheta
-% Alumno: Gallone Claudio Francesco
+% TRABAJO PRÁCTICO N° 1 
+% Profesor: Julian Pucheta 
+% Alumno: Dolores Pilar Gomez
 % Caso de estudio 2
-% Ejericio 4
-% Sistema de 3 variables de estado
- clear all ; clc; close all;
+
+% Sistema de 3 variables de estado 
+
+clear all; clc; close all
 
 % Dadas las ecuaciones del motor de corriente continua con un torque de
 % carga TL no nulo, con los parámetros: 
@@ -16,66 +17,87 @@ Ra = 55.6; % Resistencia
 Bm = 0; % Coeficiente de fricción 
 Ki = 6.49e-3; % Constante de torque 
 Km = 6.53e-3; % Constante de fuerza contra-electromotriz 
-Va   = 12;                     % tensión de actuación sobre el motor
+Va = 12; 
 
-A = [-Ra/Laa -Km/Laa 0; Ki/J -Bm/J 0; 0 1 0]
+% Consigna: Implementar un algoritmo de simulación para inferir el
+% comportamiento de las variables de interés mediante integración Euler con
+% un tamañano de paso h = 10e-7 segundos para calcular su operación con un
+% controlador. 
 
-B = [1/Laa 0 ; 0 -1/J ; 0 0]
+% MODELADO DEL MOTOR EN EL ESPACIO DE ESTADOS 
 
-C = [0 1 0]
+% Variables de estado 
+% x1 = ia;  x2 = wr;  x3 = tita 
 
-D = [0 0]
-%calculo 
-autovalores_A = eig(A)
-p1 = autovalores_A(1); % = 0
-p2 = autovalores_A(2); % = -0.001525982510575 e5
-p3 = autovalores_A(3); % = -1.5176 e5
+% Entradas 
+% u1 = Va;  u2 = TL
 
-h = log(0.95)/(-151760)
-%h = 3.3799e-07
+% Salidas
+% y1 = wr 
 
-Tsim = 5 %tiempo de simulacion
-h = 1e-5 %tamaño de paso
-NP = round(Tsim/h); %numero de puntos
-t = linspace(0,Tsim,NP);
+A = [-Ra/Laa -Km/Laa 0 ; Ki/J -Bm/J 0 ; 0 1 0]; % matriz de estados
+B = [1/Laa 0 ; 0 -1/J ; 0 0]; % matriz de entrada 
+C = [0 1 0]; % matriz de salida                                                       
+D = [0 0]; % matriz de transmisión directa   
 
-%torque maximo
-Ia = Va/Ra;
-TL = Ia*Ki;
+% Tiempo de simulación 
+T = 5; 
+tp = 10e-7; % Tamaño de paso 
+np = round (T/tp); % Número de puntos 
+t = linspace (0, T, np);
 
-%entradas de voltaje y torque
-va = 12* ones(1,NP);
-Tl = TL * ones(1,NP);
-u = [va;Tl];
+% Torque máximo 
+Ia = Va/Ra; 
+%TL = Ia*Ki
+TL = 0.0014
 
-%inicializo estados
+ia =linspace(0,0,np);
+w =linspace(0,0,np);
+tita=linspace(0,0,np);
 
-x = [0;0;0];
-ia = zeros(1,NP);
-w = zeros(1,NP);
-tetha = zeros (1,NP);
+ia(1) = 0;
+w(1) = 0;
+tita(1)= 0;
 
-%Ssimulacion por euler
-for i = 1:NP-1
-    xp = A * x + B * u(:,i); %dx/dt
-    x = x + xp*h;
-    ia(i+1) = x(1);
-    w(i+1) = x(2);
-    tetha(i+1) = x(3);
+x = [ia(1)  w(1) tita(1) ]' 
+
+xop = [0   0   0]'
+
+t = linspace(0,T,np);
+u = linspace(0,0,np);
+
+vin = 12;
+
+tL = TL*heaviside(t - 0.1869 );
+
+for i=1 : np-1
+    u(i)=vin;
+    
+           xp = A*(x-xop) + B*[u(i)  tL(i)]';
+           x  = x+xp*tp;
+       ia(i+1)= x(1);
+        w(i+1)= C*x; %Este w es la que elegi como salida dentro de la matriz C
+     tita(i+1)= x(3);
 end
 
-%GRAFICAR 
-figure
-subplot(3,1,1);plot(t, ia, "r");grid on;
-title("Corriente en el motor"); ylabel("ia (A)");
-subplot(3,1,2);plot(t, ia, "b");grid on;
-title("Velocidad angular");ylabel("w (rad/seg)");
-subplot(3,1,3);plot(t, ia, "y");grid on;
-title("Posicion angular");xlabel("Tiempo (s)"); ylabel("tetha  (rad)")
+% Graficar resultados
+figure(1)
+subplot(4,1,1)
+plot(t,w,'m','LineWidth',2); grid on; 
+title('Velocidad angular');
+%__________________________
 
-%practicamente la velocidad angular es 0 por lo que a grandes rasgos esta
-%quieto, por lo que puedo dar por satisfactorio que se cumple el torque
-%maximo, un valor aproximado de Tl = 1,4e-3 Nm
+subplot(4,1,2)
+plot(t,ia,'r','LineWidth',2); grid on; 
+title('Corriente de armadura');
+%__________________________
 
+subplot(4,1,3)
+plot(t,tita,'b','LineWidth',2); grid on; 
+title('Posicion angular');
+%__________________________
 
+subplot(4,1,4)
+plot(t,tL,'g','LineWidth',2); grid on; 
+title('Entrada Torque');
 
