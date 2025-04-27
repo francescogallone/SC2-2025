@@ -41,7 +41,7 @@ C = [0 1 0]; % matriz de salida
 D = [0 0]; % matriz de transmisión directa   
 
 % Tiempo de simulación 
-T = 5; 
+T = 0.5; %uso este tiempo para ver mejor el comportamiento inicial 
 tp = 10e-7; % Tamaño de paso 
 np = round (T/tp); % Número de puntos 
 t = linspace (0, T, np);
@@ -100,4 +100,3 @@ title('Posicion angular');
 subplot(4,1,4)
 plot(t,tL,'g','LineWidth',2); grid on; 
 title('Entrada Torque');
-
