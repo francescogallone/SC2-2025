@@ -37,22 +37,25 @@ title ("Torque según Tabla (Nm)"); grid on; hold on;
 % ELIJO 3 PUNTOS EQUISDISTANTES SEGUN LA GRAFICA DE LA VELOCIDAD ANGULAR
 %CUMPLIENDO CONDICIONES NULAS y MAXIMA VARIACION
 
-t1_w = values(110,1); y1_w = values(110,2);
-t2_w = values(120,1); y2_w = values(120,2);
-t3_w = values(130,1); y3_w = values(130,2);
 
-%elijo un 4to punto para normalizar al escalon (ganancia)
-t4_w = values(1500,1); y4_w = values(1500,2);
 
 %normalizo valores
-k_w = y4_w/Vin;
-y1_w = y1_w/Vin;
-y2_w = y2_w/Vin;
-y3_w = y3_w/Vin;
+k = w(end)/Vin;
+y1 = w(110)/2;
+t1 = t(110); %t1
 
-k1 = (y1_w/k_w)-1;
-k2 = (y2_w/k_w)-1;
-k3 = (y3_w/k_w)-1;
+y2 = w(120)/2;
+t2 = t(120); %t2
+
+y3 = w(130)/2;
+t3 = t(130); %t3
+
+% Tiempo entre muestras
+ts = t2 - t1;
+
+k1 = (y1/k)-1;
+k2 = (y2/k)-1;
+k3 = (y3/k)-1;
 
 b=((4)*(k1^3)*(k3))-((3)*(k1^2)*(k2^2))-((4)*(k2^3))+(k3^2)+((6)*(k1)*(k2)*(k3));
 
@@ -64,54 +67,16 @@ alfa2 = ((k1*k2)+(k3)+(sqrt(b)))/(2*((k1^2)+(k2)));
 Beta=(k1+alfa2)/(alfa1-alfa2); 
 
 %Calculo la constante de tiempo T1:
-T1= -((t1_w)/(log(alfa1)))
+T1      =       (-ts/log(alfa1));
 
 %Calculo la constante de tiempo T2:
-T2= -(t1_w)/(log(alfa2))
+T2      =       (-ts/log(alfa2));
 
 %Calculo la constante de tiempo T3:
 T3= (Beta*(T1-T2))+(T1)
 
 % Función de transferencia calculada por el método de CHEN 
-G_w = tf(k_w*[T3 1],conv([T1 1],[T2 1])) %   G_w = (w)/(Va)
-
-%metodo de chen para la corriente 
-
-t1_i = values(110,1); y1_i = values(110,3);
-t2_i = values(120,1); y2_i = values(120,3);
-t3_i = values(130,1); y3_i = values(130,3);
-
-t4_i = values(1500,1); y4_i = values(1500,3);
-
-%normalizo valores
-k_i = y4_i/Vin;
-y1_i = y1_i/Vin;
-y2_i = y2_i/Vin;
-y3_i = y3_i/Vin;
-
-k1_i = (y1_i/k_i)-1;
-k2_i = (y2_i/k_i)-1;
-k3_i = (y3_i/k_i)-1;
-
-b_i=((4)*(k1_i^3)*(k3_i))-((3)*(k1_i^2)*(k2_i^2))-((4)*(k2_i^3))+(k3_i^2)+((6)*(k1_i)*(k2_i)*(k3_i));
-
-% 6: Cálculo de alfas 
-alfa1_i = ((k1_i*k2_i)+(k3_i)-(sqrt(b_i)))/(2*((k1_i^2)+(k2_i))); 
-alfa2_i = ((k1_i*k2_i)+(k3_i)+(sqrt(b_i)))/(2*((k1_i^2)+(k2_i))); 
-
-% 7: Cálculo de beta 
-Beta_i=(k1_i+alfa2_i)/(alfa1_i-alfa2_i);
-
-%Calculo la constante de tiempo T1:
-T1_i= -((t1_i)/(log(alfa1_i)))
-
-%Calculo la constante de tiempo T2:
-T2_i= -(t1_i)/(log(alfa2_i))
-
-%Calculo la constante de tiempo T3:
-T3_i= (Beta_i*(T1_i-T2_i))+(T1_i)
-
-G_i = tf(k_i*[T3_i 1],conv([T1_i 1],[T2_i 1])) 
+G_wv = tf(k,conv([T1 1],[T2 1])) %funcion de transferencia W/Va
 
 Ki = 0.2769;
 J  = 0.0028;
