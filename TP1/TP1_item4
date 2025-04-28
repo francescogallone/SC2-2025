@@ -49,7 +49,7 @@ t = linspace (0, T, np);
 % Torque máximo 
 Ia = Va/Ra; 
 %TL = Ia*Ki
-TL = 0.0014
+TL = 0.001400719
 
 ia =linspace(0,0,np);
 w =linspace(0,0,np);
