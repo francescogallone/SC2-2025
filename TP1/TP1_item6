@@ -1,8 +1,8 @@
-% Sistemas de Control II -FCEFyN-UNC 
+%TRABAJO PRACTICO N° 1
 % Profesor: Julian A. Pucheta
-% Alumno: Gallone, Francesco
-% Actividad Práctica N1 - Caso de estudio 2
-%   Inciso 6
+% Alumno: Gallone Claudio Francesco
+% Caso de estudio 2
+% Ejercicio 5
 %   Implementar un PID en tiempo discreto para que el ángulo del motor permanezca en una 
 %   referencia de 1radian sometido al torque dado por la hoja de excel (Tip: partir de KP=0,1; Ki=0,01; KD=5).
 %   El PID se implementará sobre el motor cuyos parámetros se obtuvieron en
